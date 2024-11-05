@@ -53,7 +53,7 @@ app.post('/recommend', (req, res) => {
       // Parse the JSON output from C++ and send it as the response
       try {
           const result = JSON.parse(stdout);
-          
+          console.log(result);
           res.json(result);
       } catch (parseError) {
           console.error(`Failed to parse JSON output: ${parseError.message}`);
