@@ -124,8 +124,8 @@ int main(int argc, char* argv[]) {
     }
     
     string targetUser = argv[1];  // Take user ID from command line
-    string transactionsFile = "../dataset/transactions.json";  // JSON file path
-    string userDataFile = "../dataset/users_data.json"; // User data JSON file path
+    string transactionsFile = "dataset/transactions.json";  // JSON file path
+    string userDataFile = "dataset/users_data.json"; // User data JSON file path
     
     populateUserDataFromJson(userDataFile); // Load user data first
     populatePurchasesFromJson(transactionsFile); // Load transactions

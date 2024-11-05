@@ -35,7 +35,7 @@ app.post('/recommend', (req, res) => {
   }
 
   // Execute the C++ program with the user ID as an argument
-  const cppExecutable = path.join(__dirname, 'cpp_algorithms', 'recommend.exe');
+  const cppExecutable = path.join(__dirname, 'cpp_algorithms', 'user_recommend.exe');
   console.log(`"${cppExecutable}" ${user}`);
   
   exec(`"${cppExecutable}" ${user}`, (error, stdout, stderr) => {
@@ -53,6 +53,7 @@ app.post('/recommend', (req, res) => {
       // Parse the JSON output from C++ and send it as the response
       try {
           const result = JSON.parse(stdout);
+          
           res.json(result);
       } catch (parseError) {
           console.error(`Failed to parse JSON output: ${parseError.message}`);
