@@ -1,31 +1,24 @@
 import React, { Component } from "react";
 import Slider from "react-slick";
-import ProductCard from "./productCardVertical";
+import ProductCard from "./productCardVertical"; // Adjust the import if necessary
 import axios from "axios";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 class ProductSlider extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       products: [],
     };
   }
 
   componentDidMount() {
-    this.fetchProductIds();
-  }
-
-  fetchProductIds = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/product-ids");
-      const productIds = response.data;
-      this.fetchProducts(productIds);
-    } catch (error) {
-      console.error("Error fetching product IDs:", error);
+    const { productIds } = this.props; // Get productIds from props
+    if (productIds && productIds.length > 0) {
+      this.fetchProducts(productIds); // Fetch products if productIds are provided
     }
-  };
+  }
 
   fetchProducts = async (productIds) => {
     try {
@@ -75,7 +68,7 @@ class ProductSlider extends Component {
       <div>
         <Slider {...settings}>
           {this.state.products.map((product) => (
-            <div key={product.key}>
+            <div key={product.id}> {/* Use product.id for the key */}
               <ProductCard
                 imgSrc={product.image}
                 name={product.name}
@@ -94,5 +87,10 @@ class ProductSlider extends Component {
     );
   }
 }
+
+// PropTypes can be added to ensure that productIds are passed correctly
+ProductSlider.defaultProps = {
+  productIds: [], // Default to an empty array if no productIds are provided
+};
 
 export default ProductSlider;

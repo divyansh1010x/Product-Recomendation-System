@@ -13,7 +13,7 @@ const ProductCard = (props) => {
             ? `${props.description.substring(0, 50)}...`
             : props.description}
         </Card.Text>
-        <Card.Text className="product-price"><strong>${props.price}</strong></Card.Text>
+        <Card.Text className="product-price"><strong>Rs. {props.price}</strong></Card.Text>
         <Card.Text className="product-brand"><strong>Brand:</strong> {props.brand}</Card.Text>
         <Card.Text className="product-model"><strong>Model:</strong> {props.model}</Card.Text>
         <Card.Text className="product-category">Category: {props.category}</Card.Text>
