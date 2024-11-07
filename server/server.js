@@ -126,6 +126,39 @@ app.post('/fav_category', (req, res) => {
   });
 });
 
+app.post('/search', (req, res) => {
+  log(req.body);
+
+  const searchTerm = req.body.searchTerm;
+  console.log(searchTerm);
+  
+  const cppExecutable = path.join(__dirname, `cpp_algorithms`, `search.exe`);
+  console.log(`"${cppExecutable}" ${searchTerm}`);
+
+  exec(`"${cppExecutable}" ${searchTerm}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing C++ program: ${error.message}`);
+      return res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+    console.log("executed");
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return res.status(500).json({ error: 'Error in C++ program' });
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      console.log(result);
+      res.json(result);
+    } catch (parseError) {
+      console.error(`Failed to parse JSON output: ${parseError.message}`);
+      res.status(500).json({ error: 'Failed to parse recommendations' });
+    }
+  })
+  
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
