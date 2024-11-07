@@ -201,26 +201,19 @@ void outputRecommendationsToJson(const std::vector<Product>& topProducts,
 
 
 int main(int argc, char* argv[]) {
-    // Command-line argument parsing and validation...
-    
-    int targetUserId;
-    try {
-        targetUserId = std::stoi(argv[2]);
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid user ID: " << argv[2] << " - it must be a number." << std::endl;
-        return 1;
-    } catch (const std::out_of_range& e) {
-        std::cerr << "User ID is out of range: " << argv[2] << std::endl;
+    // Check if the category argument is provided
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <category>" << std::endl;
         return 1;
     }
 
-    std::string targetCategory = argv[3]; // Get category from command line
+    std::string targetCategory = argv[1]; // Get category from command line
 
-    // Load product and user data from JSON files
-    std::vector<Product> products = loadProductsFromFile("../dataset/MOCK_DATA.json");
+    // Load product data from JSON files
+    std::vector<Product> products = loadProductsFromFile("dataset/MOCK_DATA.json");
 
-    // Load the new transaction data
-    auto transactionCount = loadTransactionData("../dataset/transactions.json");
+    // Load transaction data
+    auto transactionCount = loadTransactionData("dataset/dummy2.json");
 
     // Update products with purchase counts
     for (auto& product : products) {
@@ -258,7 +251,7 @@ int main(int argc, char* argv[]) {
         outputJson["global_trending"].push_back(product.key); // Only push the product key
     }
 
-    // Add category trending product keys as an array directly
+    // Add category trending product keys
     outputJson["category_trending"] = json::array();
     for (const auto& product : topCategoryProducts) {
         outputJson["category_trending"].push_back(product.key); // Only push the product key
