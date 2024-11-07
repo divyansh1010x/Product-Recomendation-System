@@ -74,12 +74,20 @@ string find_favorite_category(int user_id, const vector<Transaction>& transactio
         return max_heap.top().second;  // Return the category with the highest count
     }
 
-    return " ";
+    return "No transactions found for the user";
 }
 
-int main() {
-    // Step 1: Load the product catalog from the JSON file
-    ifstream product_file("../dataset/MOCK_DATA.json");
+int main(int argc, char* argv[]) {
+    // Step 1: Check if user_id is passed as a command-line argument
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <user_id>" << endl;
+        return 1;
+    }
+
+    int user_id = stoi(argv[1]);  // Convert command-line argument to user_id
+
+    // Step 2: Load the product catalog from the JSON file
+    ifstream product_file("dataset/MOCK_DATA.json");
     if (!product_file.is_open()) {
         cerr << "Failed to open the product catalog file!" << endl;
         return 1;
@@ -107,8 +115,8 @@ int main() {
         product_catalog[product.key] = product;
     }
 
-    // Step 2: Load the transactions from the JSON file
-    ifstream transaction_file("../dataset/dummy2.json");
+    // Step 3: Load the transactions from the JSON file
+    ifstream transaction_file("dataset/dummy2.json");
     if (!transaction_file.is_open()) {
         cerr << "Failed to open the transactions file!" << endl;
         return 1;
@@ -135,11 +143,10 @@ int main() {
         transactions.push_back(transaction);
     }
 
-    // Step 3: Find the favorite category for a user
-    int user_id = 68;  // Example user_id
+    // Step 4: Find the favorite category for the entered user ID
     string favorite_category = find_favorite_category(user_id, transactions, product_catalog);
     
-    // Step 4: Prepare the recommendations in JSON format
+    // Step 5: Prepare the recommendations in JSON format
     json recommendations;
     recommendations["user_id"] = user_id;
     recommendations["favorite_category"] = favorite_category;

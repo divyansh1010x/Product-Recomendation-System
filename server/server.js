@@ -98,6 +98,34 @@ app.post('/trending', (req, res) => {
   });  
 });
 
+app.post('/fav_category', (req, res) => {
+  const userId = req.body.user;  // assuming req.body contains { user: "97" }
+
+  const cppExecutable = path.join(__dirname, 'cpp_algorithms', 'fav_category.exe');
+  const command = `"${cppExecutable}" ${userId}`;
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.log(`Error executing C++ program: ${error.message}`);
+      return res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return res.status(500).json({ error: 'Error in C++ program' });
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      console.log(result);
+      res.json(result);
+    } catch (parseError) {
+      console.error(`Failed to parse JSON output: ${parseError.message}`);
+      res.status(500).json({ error: 'Failed to parse recommendations' });
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
