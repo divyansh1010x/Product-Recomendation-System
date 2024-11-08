@@ -15,6 +15,7 @@ app.use(express.json());
 
 // Path to the user data JSON file
 const userDataPath = path.join(__dirname, 'dataset', 'users_data.json');
+const transactionsFilePath = path.join(__dirname, 'dataset', 'dummy2.json');
 
 // Endpoint to get product IDs (you can customize this as needed)
 app.get("/api/product-ids", (req, res) => {
@@ -185,6 +186,49 @@ app.post('/api/signup', (req, res) => {
       console.log('New user added:', newUser);
       // Respond with the new user's details, including the user_id
       res.status(201).json(newUser);
+    });
+  });
+});
+
+// Endpoint to handle multiple product purchases
+app.post('/api/purchase', (req, res) => {
+  const { user, products } = req.body; // 'products' is an array of product IDs
+  
+  // Validate request
+  if (!user || !products || !Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({ error: 'User and an array of product IDs are required' });
+  }
+  
+  // Format transaction data with only 'user' and 'product' fields
+  const newTransaction = {
+    user: user,
+    product: products.join(",") // Join product IDs into a comma-separated string
+  };
+
+  // Read the existing transactions file
+  fs.readFile(transactionsFilePath, 'utf8', (err, data) => {
+    if (err) return res.status(500).json({ error: 'Error reading transactions file' });
+    
+    let transactions = [];
+    try {
+      transactions = JSON.parse(data);
+    } catch (parseError) {
+      console.error(`Error parsing transactions data: ${parseError.message}`);
+      return res.status(500).json({ error: 'Failed to parse transactions data' });
+    }
+
+    // Add the new transaction to the transactions array
+    transactions.push(newTransaction);
+
+    // Save the updated transactions back to the file
+    fs.writeFile(transactionsFilePath, JSON.stringify(transactions, null, 2), (writeErr) => {
+      if (writeErr) {
+        console.error(`Error writing transactions file: ${writeErr.message}`);
+        return res.status(500).json({ error: 'Failed to save transactions file' });
+      }
+
+      console.log('Transaction logged successfully!');
+      res.status(200).json({ message: 'Purchase successful' });
     });
   });
 });
