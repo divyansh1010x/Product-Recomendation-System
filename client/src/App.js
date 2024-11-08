@@ -5,12 +5,14 @@ import HomePage from '../src/pages/homePage';
 import DummyPage from '../src/pages/dummyPage';
 import LoginPage from '../src/pages/loginPage';
 import SignupPage from '../src/pages/signupPage';
+import SearchPage from '../src/pages/searchPage';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/home" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path='/dummy' element={<DummyPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />

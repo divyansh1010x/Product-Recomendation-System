@@ -21,8 +21,7 @@ const ProductCard = (props) => {
           ⭐ <strong>{props.rating}</strong> ({props.reviews} reviews)
         </div>
         <div className="product-actions">
-          <Button variant="primary">Buy Now</Button>
-          <Button variant="secondary">Add to Cart</Button>
+          <Button variant="primary">Add to Cart</Button>
         </div>
       </Card.Body>
     </Card>
