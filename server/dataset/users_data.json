@@ -708,16 +708,9 @@
   },
   {
     "user_id": 102,
-    "name": "Faizal",
-    "age": "18",
+    "name": "Chirag",
+    "age": "20",
     "country": "India",
-    "gender": "male"
-  },
-  {
-    "user_id": 103,
-    "name": "Asad",
-    "age": "19",
-    "country": "Mayanmar",
     "gender": "male"
   }
 ]

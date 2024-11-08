@@ -3,7 +3,7 @@ const cors = require("cors");
 const products = require("./dataset/MOCK_DATA.json"); // Update path if necessary
 const { exec } = require("child_process");
 const path = require('path');
-const fs = require("fs");
+const fs = require("fs"); 
 const { stdout, stderr } = require("process");
 const { log } = require("console");
 
@@ -13,7 +13,6 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// Path to the user data JSON file
 const userDataPath = path.join(__dirname, 'dataset', 'users_data.json');
 const transactionsFilePath = path.join(__dirname, 'dataset', 'dummy2.json');
 
@@ -131,6 +130,39 @@ app.post('/fav_category', (req, res) => {
   });
 });
 
+app.post('/search', (req, res) => {
+  log(req.body);
+
+  const searchTerm = req.body.searchTerm;
+  console.log(searchTerm);
+  
+  const cppExecutable = path.join(__dirname, `cpp_algorithms`, `search.exe`);
+  console.log(`"${cppExecutable}" ${searchTerm}`);
+
+  exec(`"${cppExecutable}" ${searchTerm}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing C++ program: ${error.message}`);
+      return res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+    console.log("executed");
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return res.status(500).json({ error: 'Error in C++ program' });
+    }
+
+    try {
+      const result = JSON.parse(stdout);
+      console.log(result);
+      res.json(result);
+    } catch (parseError) {
+      console.error(`Failed to parse JSON output: ${parseError.message}`);
+      res.status(500).json({ error: 'Failed to parse recommendations' });
+    }
+  })
+  
+});
+
 app.post('/api/login', (req, res) => {
   const { name, userId } = req.body;
   fs.readFile(userDataPath, 'utf8', (err, data) => {
@@ -146,19 +178,15 @@ app.post('/api/login', (req, res) => {
     }
   });
 });
-
-
 // Endpoint for user signup
 app.post('/api/signup', (req, res) => {
   const { name, age, country, gender } = req.body;
-
   // Read the existing user data
   fs.readFile(userDataPath, 'utf8', (err, data) => {
     if (err) {
       console.error(`Error reading user data: ${err.message}`);
       return res.status(500).json({ error: 'Failed to read user data' });
     }
-
     let users = [];
     try {
       users = JSON.parse(data); // Parse the existing user data
@@ -166,23 +194,18 @@ app.post('/api/signup', (req, res) => {
       console.error(`Error parsing user data: ${parseError.message}`);
       return res.status(500).json({ error: 'Failed to parse user data' });
     }
-
     // Generate the new user_id by getting the max user_id and adding 1
     const newUserId = Math.max(...users.map(user => user.user_id), 0) + 1;
-
     // Create the new user object
     const newUser = { user_id: newUserId, name, age, country, gender };
-
     // Add the new user to the users array
     users.push(newUser);
-
     // Write the updated users array back to users_data.json
     fs.writeFile(userDataPath, JSON.stringify(users, null, 2), (writeErr) => {
       if (writeErr) {
         console.error(`Error writing user data: ${writeErr.message}`);
         return res.status(500).json({ error: 'Failed to save user data' });
       }
-
       console.log('New user added:', newUser);
       // Respond with the new user's details, including the user_id
       res.status(201).json(newUser);

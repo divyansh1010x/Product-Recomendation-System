@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignupPage.css'; // Importing external CSS for styles
-
 function SignupPage() {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [country, setCountry] = useState('');
   const [gender, setGender] = useState('');
   const navigate = useNavigate();
-
   const handleSignup = async (e) => {
     e.preventDefault();
-
     // Send signup data to server
     const newUser = { name, age, country, gender };
     const response = await fetch('http://localhost:5000/api/signup', {
@@ -19,7 +16,6 @@ function SignupPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newUser),
     });
-
     if (response.ok) {
       const result = await response.json(); // Get the response body which includes user_id
       alert(`Signup successful! Your user ID is ${result.user_id}. Please remember this ID for future login purposes.`);
@@ -28,7 +24,6 @@ function SignupPage() {
       alert('Signup failed. Please try again.');
     }
   };
-
   return (
     <div className="signup-container">
       <div className="signup-form">
@@ -86,5 +81,4 @@ function SignupPage() {
     </div>
   );
 }
-
 export default SignupPage;
