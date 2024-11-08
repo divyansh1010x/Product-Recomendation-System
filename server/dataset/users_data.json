@@ -711,6 +711,13 @@
     "name": "Chirag",
     "age": "20",
     "country": "India",
-    "gender": "male"
+    "gender": "Male"
+  },
+  {
+    "user_id": 103,
+    "name": "aarav",
+    "age": "20",
+    "country": "India",
+    "gender": "Male"
   }
 ]

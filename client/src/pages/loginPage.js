@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './LoginPage.css'; // Importing external CSS for styles
+import './LoginPage.css';
+
 function LoginPage() {
   const [name, setName] = useState('');
   const [userId, setUserId] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  // Handle login function
   const handleLogin = async (e) => {
     e.preventDefault();
-    
-    // Reset any previous error
+
     setError('');
-    // Send login request to the server API
+
     try {
       const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
@@ -20,10 +22,18 @@ function LoginPage() {
         },
         body: JSON.stringify({ name, userId }),
       });
-      // Handle server response
+
       if (response.ok) {
         const user = await response.json();
         console.log('Login successful:', user);
+
+        // Store user info in session storage
+        sessionStorage.setItem('user', JSON.stringify(user));
+
+        // Fetch and store the favorite category
+        await fetchFavoriteCategory(user.user_id);
+
+        // Navigate to the home page
         navigate('/home');
       } else {
         const data = await response.json();
@@ -34,6 +44,31 @@ function LoginPage() {
       setError('An error occurred during login. Please try again.');
     }
   };
+
+  // Fetch favorite category function
+  const fetchFavoriteCategory = async (userId) => {
+    try {
+      const response = await fetch('http://localhost:5000/fav_category', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user: userId }),  // Match your API's expected request body format
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch favorite category');
+
+      const data = await response.json();
+
+      // Assuming the favorite category is provided directly in the API's response
+      if (data.favorite_category) {
+        sessionStorage.setItem('favorite_category', data.favorite_category);
+      }
+    } catch (error) {
+      console.error('Error fetching favorite category:', error);
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-form">
@@ -69,4 +104,5 @@ function LoginPage() {
     </div>
   );
 }
+
 export default LoginPage;
