@@ -8,7 +8,8 @@ function App() {
     const [recommendations, setRecommendations] = useState({
         userRecommendations: [],
         global_trending: [],
-        category_trending: []
+        category_trending: [],
+        recommendationApiProducts: [] // New state for the fourth slider
     });
     const [showSliders, setShowSliders] = useState(false);
 
@@ -76,20 +77,44 @@ function App() {
         }
     };
 
+    // Function to fetch products for the fourth slider using /userby_recommendation API
+    const getRecommendationApiProducts = async (userId) => {
+        try {
+            const response = await fetch('http://localhost:5001/userby_recommendation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user: userId }),
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch products from recommendation API');
+            const data = await response.json();
+
+            // Directly return the array of product IDs
+            return data; // Since the API returns the array directly
+        } catch (error) {
+            console.error('Error fetching products from recommendation API:', error);
+            return [];
+        }
+    };
+
     // Main function to fetch all recommendations
     const getAllRecommendations = async (userId) => {
         try {
-            // Get user recommendations and trending data in parallel
-            const [userRecs, trendingData] = await Promise.all([
+            // Get user recommendations, trending data, and recommendation API products in parallel
+            const [userRecs, trendingData, recommendationApiProducts] = await Promise.all([
                 getUserRecommendations(userId),
-                getTrendingRecommendations(userId)
+                getTrendingRecommendations(userId),
+                getRecommendationApiProducts(userId) // Fetch for the new slider
             ]);
 
             setFavoriteCategory(trendingData.favorite_category);
             setRecommendations({
                 userRecommendations: userRecs,
                 global_trending: trendingData.global_trending,
-                category_trending: trendingData.category_trending
+                category_trending: trendingData.category_trending,
+                recommendationApiProducts: recommendationApiProducts // Set the fetched product IDs
             });
             setShowSliders(true);
         } catch (error) {
@@ -100,6 +125,7 @@ function App() {
 
     // Use useEffect to fetch recommendations on component mount
     useEffect(() => {
+        // Retrieve user ID from session storage
         const userData = sessionStorage.getItem('user');
         
         if (userData) {
@@ -139,10 +165,21 @@ function App() {
                     {/* Category-specific Trending Products */}
                     {recommendations.category_trending.length > 0 && (
                         <div>
-                            <h1>Trending in {favoriteCategory}</h1>
+                            <h1>Cause you like {favoriteCategory}</h1>
                             <ProductSlider 
                                 productIds={recommendations.category_trending} 
                                 title={`Trending in ${favoriteCategory}`} 
+                            />
+                        </div>
+                    )}
+
+                    {/* Fourth Slider for /userby_recommendation API */}
+                    {recommendations.recommendationApiProducts.length > 0 && (
+                        <div>
+                            <h1>More Recommendations</h1>
+                            <ProductSlider 
+                                productIds={recommendations.recommendationApiProducts} 
+                                title="Recommended from API" 
                             />
                         </div>
                     )}

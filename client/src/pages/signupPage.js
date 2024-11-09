@@ -19,7 +19,7 @@ function SignupPage() {
     if (response.ok) {
       const result = await response.json(); // Get the response body which includes user_id
       alert(`Signup successful! Your user ID is ${result.user_id}. Please remember this ID for future login purposes.`);
-      navigate('/');
+      navigate('/login');
     } else {
       alert('Signup failed. Please try again.');
     }
@@ -75,7 +75,7 @@ function SignupPage() {
           <button type="submit" className="signup-button">Sign Up</button>
         </form>
         <p className="login-link">
-          Already have an account? <a href="/">Login here</a>
+          Already have an account? <a href="/login">Login here</a>
         </p>
       </div>
     </div>
