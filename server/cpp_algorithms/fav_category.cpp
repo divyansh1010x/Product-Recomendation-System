@@ -74,7 +74,7 @@ string find_favorite_category(int user_id, const vector<Transaction>& transactio
         return max_heap.top().second;  // Return the category with the highest count
     }
 
-    return "No transactions found for the user";
+    return " ";
 }
 
 int main(int argc, char* argv[]) {
