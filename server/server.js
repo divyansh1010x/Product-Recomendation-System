@@ -71,6 +71,41 @@ app.post('/recommend', (req, res) => {
   });
 });
 
+// Endpoint to handle user-based recommendations (renamed)
+app.post('/userby_recommendation', (req, res) => {
+  const userId = req.body.user; // User ID received from the request body
+  console.log(`Received User ID: ${userId}`);
+
+  if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+  }
+
+  // Path to the Python script that handles recommendations
+  const pythonScriptPath = path.join(__dirname, 'recommendation.py');
+  
+  // Execute the Python script and pass the userId as argument
+  exec(`python3 ${pythonScriptPath} ${userId}`, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Error executing Python script: ${error.message}`);
+          return res.status(500).json({ error: 'Failed to get recommendations' });
+      }
+      
+      if (stderr) {
+          console.error(`stderr: ${stderr}`);
+          return res.status(500).json({ error: 'Error in Python script' });
+      }
+
+      try {
+          // Parse the JSON output from Python script and send it as the response
+          const recommendations = JSON.parse(stdout);
+          res.json(recommendations);
+      } catch (parseError) {
+          console.error(`Failed to parse JSON output: ${parseError.message}`);
+          res.status(500).json({ error: 'Failed to parse recommendations' });
+      }
+  });
+});
+
 app.post('/trending', (req, res) => {
   console.log(req.body);
 
