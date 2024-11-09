@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ProductSlider from '../components/productSlider';
+import Navbar from '../components/navBar';
 
 function App() {
     const [inputValue, setInputValue] = useState('');
@@ -36,9 +37,8 @@ function App() {
 
             const data = await response.json();
             console.log('Fetched recommendations:', data.recommendations);
-            setRecommendations(data.recommendations);  // Set the recommendation IDs
+            setRecommendations(data.recommendations);
 
-            // If recommendations are empty, show an error
             if (data.recommendations.length === 0) {
                 setError(`There is no product as "${inputValue}"`);
             }
@@ -52,23 +52,78 @@ function App() {
 
     return (
         <div>
-            <input
-                type="text"
-                value={inputValue}
-                onChange={handleChange}
-                placeholder="Search for products..."
-            />
-            <button onClick={handleSearch} disabled={loading}>
-                {loading ? 'Searching...' : 'Search'}
-            </button>
+            <Navbar />
+            <div style={styles.container}>
+                <div style={styles.searchContainer}>
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={handleChange}
+                        placeholder="Search for products..."
+                        style={styles.input}
+                    />
+                    <button onClick={handleSearch} disabled={loading} style={styles.button}>
+                        {loading ? 'Searching...' : 'Search'}
+                    </button>
+                </div>
+            </div>
 
-            {error && <p>Error: {error}</p>}
-            {loading && <p>Loading...</p>}
+            {error && <p style={styles.error}>{error}</p>}
+            {loading && <p style={styles.loading}>Loading...</p>}
             {!loading && !error && recommendations.length > 0 && (
-                <ProductSlider productIds={recommendations} />  // Pass the IDs to ProductSlider
+                <ProductSlider productIds={recommendations} />
             )}
         </div>
     );
 }
+
+const styles = {
+    container: {
+        fontFamily: 'Arial, sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '20px',
+        backgroundColor: '#f4f6f8',
+    },
+    searchContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        marginTop: '20px',
+        gap: '10px',
+    },
+    input: {
+        width: '300px',
+        padding: '10px',
+        fontSize: '16px',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+    },
+    button: {
+        padding: '10px 20px',
+        fontSize: '16px',
+        color: '#fff',
+        backgroundColor: '#007bff',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s ease',
+    },
+    error: {
+        color: '#ff4d4f',
+        fontSize: '20px',            
+        fontWeight: 'bold',          
+        textAlign: 'center',          
+        marginTop: '20px',           
+        padding: '10px 20px',
+        borderRadius: '5px',        
+    },
+    loading: {
+        color: '#007bff',
+        marginTop: '10px',
+        fontSize: '16px',
+    },
+};
+
 
 export default App;

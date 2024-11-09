@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductSlider from '../components/productSlider'; // Adjust the import path if necessary
+import Navbar from '../components/navBar';
 
 function App() {
     const [user, setUserId] = useState('');
@@ -72,6 +73,7 @@ function App() {
 
     return (
         <div className="App">
+            <Navbar />
             {showUserSlider && recommendations.length > 0 && (
                 <div>
                     <h1>You may like</h1>

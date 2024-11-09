@@ -3,6 +3,18 @@ import { Card, Button } from "react-bootstrap";
 import "./productCard.css";
 
 const ProductCard = (props) => {
+  // Function to handle adding the product key to the cart
+  const addToCart = () => {
+    // Retrieve the cart from session storage (or initialize as an empty array if it doesn't exist)
+    const cart = JSON.parse(sessionStorage.getItem("cart")) || [];
+    
+    // Check if the product ID is already in the cart to avoid duplicates
+    if (!cart.includes(props.id)) {
+      cart.push(props.id); // Add only the product ID
+      sessionStorage.setItem("cart", JSON.stringify(cart)); // Save the updated cart array back to session storage
+    }
+  };
+
   return (
     <Card className="product-card text-center">
       <Card.Img variant="top" src={props.imgSrc} className="product-image" />
@@ -21,7 +33,7 @@ const ProductCard = (props) => {
           ⭐ <strong>{props.rating}</strong> ({props.reviews} reviews)
         </div>
         <div className="product-actions">
-          <Button variant="primary">Add to Cart</Button>
+          <Button variant="primary" onClick={addToCart}>Add to Cart</Button>
         </div>
       </Card.Body>
     </Card>
