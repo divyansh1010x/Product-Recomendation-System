@@ -34,7 +34,7 @@ function LoginPage() {
         await fetchFavoriteCategory(user.user_id);
 
         // Navigate to the home page
-        navigate('/home');
+        navigate('/dummy');
       } else {
         const data = await response.json();
         setError(data.error || 'Invalid login credentials');

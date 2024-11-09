@@ -78,4 +78,23 @@
     background-color: #5a6268; /* Darker shade on hover */
     transform: scale(1.05); /* Slightly enlarge on hover */
   }
+
+  .remove-from-cart-btn {
+    margin-top: 10px;
+    width: auto; /* Normal size */
+    padding: 8px 16px; /* Adjust padding for a standard button size */
+    font-size: 14px; /* Adjust text size */
+    background-color: #dc3545; /* Red background */
+    border: 1px solid #dc3545; /* Red border */
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .remove-from-cart-btn:hover {
+    background-color: #c82333; /* Darker red when hovering */
+    border-color: #bd2130; /* Darker border */
+  }
+  
   

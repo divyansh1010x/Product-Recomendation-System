@@ -68,8 +68,9 @@ class ProductSlider extends Component {
       <div>
         <Slider {...settings}>
           {this.state.products.map((product) => (
-            <div key={product.id}> {/* Use product.id for the key */}
+            <div key={product.key}> {/* Use product.id for the key */}
               <ProductCard
+                id={product.key}
                 imgSrc={product.image}
                 name={product.name}
                 price={product.price}

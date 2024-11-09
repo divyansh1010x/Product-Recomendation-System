@@ -52,9 +52,6 @@ public:
             }
             node = node->children[c];
             node->products.insert({-popularity, productId});  // Insert product ID with popularity
-            if (node->products.size() > 10) {
-                node->products.erase(--node->products.end());  // Keep only top 10 by popularity
-            }
         }
         node->isEndOfWord = true;
     }
