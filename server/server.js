@@ -90,7 +90,7 @@ app.post('/userby_recommendation', (req, res) => {
   const pythonScriptPath = path.join(__dirname, 'recommendation.py');
   
   // Execute the Python script and pass the userId as argument
-  exec(`python3 ${pythonScriptPath} ${userId}`, (error, stdout, stderr) => {
+  exec(`python "${pythonScriptPath}" ${userId}`, (error, stdout, stderr) => {
       if (error) {
           console.error(`Error executing Python script: ${error.message}`);
           return res.status(500).json({ error: 'Failed to get recommendations' });
