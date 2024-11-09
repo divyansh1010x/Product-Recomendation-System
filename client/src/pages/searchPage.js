@@ -23,7 +23,7 @@ function App() {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:5000/search', {
+            const response = await fetch('http://localhost:5001/search', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

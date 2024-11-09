@@ -6,22 +6,28 @@
 #include <string>
 #include "../include/nlohmann/json.hpp"
 
+using namespace std;
 using json = nlohmann::json;
 
 // Structure to store product information
 struct Product {
     int key;
-    std::string name;
-    std::string model;
-    std::string description;
+    string name;
+    string model;
+    string description;
     int mrp;
     int price;
-    std::string image;
-    std::string brand;
-    std::string category;
+    string image;
+    string brand;
+    string category;
     int reviews;
     int rating;
     int purchase_count = 0;  // New field to track purchase count
+
+    Product(int k, const string& n, const string& m, const string& d, int mrp_, int p,
+            const string& img, const string& b, const string& cat, int rev, int r) 
+        : key(k), name(n), model(m), description(d), mrp(mrp_), price(p), image(img), brand(b), 
+          category(cat), reviews(rev), rating(r) {}
 
     // Overload the less-than operator to use purchase count for max-heap ordering
     bool operator<(const Product& other) const {
@@ -54,15 +60,15 @@ struct Product {
 // Structure to store user information
 struct User {
     int user_id;
-    std::string name;
+    string name;
     int age;
-    std::string country;
-    std::string gender;
+    string country;
+    string gender;
 };
 
 // Function to recommend top products
-std::vector<Product> recommendTopProducts(std::priority_queue<Product> maxHeap, int topN) {
-    std::vector<Product> topProducts;
+vector<Product> recommendTopProducts(priority_queue<Product> maxHeap, int topN) {
+    vector<Product> topProducts;
     for (int i = 0; i < topN && !maxHeap.empty(); ++i) {
         topProducts.push_back(maxHeap.top());
         maxHeap.pop();
@@ -71,12 +77,12 @@ std::vector<Product> recommendTopProducts(std::priority_queue<Product> maxHeap, 
 }
 
 // Function to load products from a JSON file
-std::vector<Product> loadProductsFromFile(const std::string& filename) {
-    std::ifstream file(filename);
+vector<Product> loadProductsFromFile(const string& filename) {
+    ifstream file(filename);
     json productsJson;
     file >> productsJson;
 
-    std::vector<Product> products;
+    vector<Product> products;
     for (const auto& item : productsJson) {
         Product product = {
             item["key"],
@@ -97,10 +103,10 @@ std::vector<Product> loadProductsFromFile(const std::string& filename) {
 }
 
 // Function to load transaction data from a JSON file
-std::unordered_map<int, int> loadTransactionData(const std::string& filename) {
-    std::ifstream file(filename);
+unordered_map<int, int> loadTransactionData(const string& filename) {
+    ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Error opening transactions file: " << filename << std::endl;
+        cerr << "Error opening transactions file: " << filename << endl;
         return {};
     }
 
@@ -109,32 +115,30 @@ std::unordered_map<int, int> loadTransactionData(const std::string& filename) {
     file.close();
 
     // Dictionary to hold purchase counts for each product
-    std::unordered_map<int, int> purchaseCount;
+    unordered_map<int, int> purchaseCount;
 
     for (const auto& transaction : transactionsJson) {
-        // Parse user ID as string, then convert to int
         int userId;
         if (transaction["user"].is_number()) {
             userId = transaction["user"];
         } else if (transaction["user"].is_string()) {
-            userId = std::stoi(transaction["user"].get<std::string>());
+            userId = stoi(transaction["user"].get<string>());
         } else {
-            std::cerr << "Invalid user ID format in transactions." << std::endl;
-            continue;  // Skip this transaction if user ID is invalid
+            cerr << "Invalid user ID format in transactions." << endl;
+            continue;
         }
 
-        // Parse each product ID, handling both int and string formats
         for (const auto& product : transaction["product"]) {
             int productId;
             if (product.is_number()) {
                 productId = product;
             } else if (product.is_string()) {
-                productId = std::stoi(product.get<std::string>());
+                productId = stoi(product.get<string>());
             } else {
-                std::cerr << "Invalid product ID format in transactions." << std::endl;
-                continue;  // Skip this product if product ID is invalid
+                cerr << "Invalid product ID format in transactions." << endl;
+                continue;
             }
-            purchaseCount[productId]++; // Increment the count for each product purchased
+            purchaseCount[productId]++;
         }
     }
 
@@ -142,8 +146,8 @@ std::unordered_map<int, int> loadTransactionData(const std::string& filename) {
 }
 
 // Function to build a max-heap per category
-std::unordered_map<std::string, std::priority_queue<Product>> buildHeapPerCategory(const std::vector<Product>& products) {
-    std::unordered_map<std::string, std::priority_queue<Product>> categoryHeaps;
+unordered_map<string, priority_queue<Product>> buildHeapPerCategory(const vector<Product>& products) {
+    unordered_map<string, priority_queue<Product>> categoryHeaps;
 
     for (const auto& product : products) {
         categoryHeaps[product.category].push(product);
@@ -152,65 +156,18 @@ std::unordered_map<std::string, std::priority_queue<Product>> buildHeapPerCatego
     return categoryHeaps;
 }
 
-// Function to save recommendations to a JSON file
-void saveRecommendationsToJson(const std::vector<Product>& topProducts, 
-                               const std::vector<Product>& topCategoryProducts, 
-                               const std::string& targetCategory, 
-                               const std::string& filename) {
-    json outputJson;
-    
-    // Add global trending products
-    outputJson["global_trending"] = json::array();
-    for (const auto& product : topProducts) {
-        outputJson["global_trending"].push_back(product.toJson());
-    }
-
-    // Add category-specific trending products
-    outputJson["category_trending"][targetCategory] = json::array();
-    for (const auto& product : topCategoryProducts) {
-        outputJson["category_trending"][targetCategory].push_back(product.toJson());
-    }
-
-    // Write JSON to file
-    std::ofstream outputFile(filename);
-    outputFile << outputJson.dump(4); // Pretty-print with 4-space indentation
-    outputFile.close();
-}
-
-// Function to output recommendations in JSON format to stdout
-void outputRecommendationsToJson(const std::vector<Product>& topProducts, 
-                                 const std::vector<Product>& topCategoryProducts, 
-                                 const std::string& targetCategory) {
-    json outputJson;
-    
-    // Add global trending products
-    outputJson["global_trending"] = json::array();
-    for (const auto& product : topProducts) {
-        outputJson["global_trending"].push_back(product.toJson());
-    }
-
-    // Add category-specific trending products
-    outputJson["category_trending"][targetCategory] = json::array();
-    for (const auto& product : topCategoryProducts) {
-        outputJson["category_trending"][targetCategory].push_back(product.toJson());
-    }
-
-    // Output JSON to stdout
-    std::cout << outputJson.dump(4) << std::endl; // Pretty-print with 4-space indentation
-}
-
-
+// Main function to output recommendations in JSON format
 int main(int argc, char* argv[]) {
-    // Check if the category argument is provided
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <category>" << std::endl;
+    // Check if category is provided as a command-line argument
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " <category>" << endl;
         return 1;
     }
 
-    std::string targetCategory = argv[1]; // Get category from command line
+    string targetCategory = argv[1];
 
     // Load product data from JSON files
-    std::vector<Product> products = loadProductsFromFile("dataset/MOCK_DATA.json");
+    vector<Product> products = loadProductsFromFile("dataset/MOCK_DATA.json");
 
     // Load transaction data
     auto transactionCount = loadTransactionData("dataset/dummy2.json");
@@ -223,42 +180,44 @@ int main(int argc, char* argv[]) {
     }
 
     // Global max-heap for all products
-    std::priority_queue<Product> globalHeap;
+    priority_queue<Product> globalHeap;
     for (const auto& product : products) {
         globalHeap.push(product);
     }
 
     // Get top 15 trending products
     int globalTopN = 15;
-    std::vector<Product> topProducts = recommendTopProducts(globalHeap, globalTopN);
+    vector<Product> topProducts = recommendTopProducts(globalHeap, globalTopN);
 
     // Build max-heaps per category
     auto categoryHeaps = buildHeapPerCategory(products);
 
-    // Get top 10 products in the specified category
+    // Get top 10 products in the specified category if any products exist in that category
     int categoryTopN = 10;
-    std::vector<Product> topCategoryProducts;
+    vector<Product> topCategoryProducts;
     if (categoryHeaps.find(targetCategory) != categoryHeaps.end()) {
         topCategoryProducts = recommendTopProducts(categoryHeaps[targetCategory], categoryTopN);
     }
 
     // Prepare output JSON with only product keys
     json outputJson;
-    
+
     // Add global trending product keys
     outputJson["global_trending"] = json::array();
     for (const auto& product : topProducts) {
-        outputJson["global_trending"].push_back(product.key); // Only push the product key
+        outputJson["global_trending"].push_back(product.key);  // Only push the product key
     }
 
-    // Add category trending product keys
-    outputJson["category_trending"] = json::array();
-    for (const auto& product : topCategoryProducts) {
-        outputJson["category_trending"].push_back(product.key); // Only push the product key
+    // Add category trending product keys only if there are any for the specified category
+    if (!topCategoryProducts.empty()) {
+        outputJson["category_trending"] = json::array();
+        for (const auto& product : topCategoryProducts) {
+            outputJson["category_trending"].push_back(product.key);  // Only push the product key
+        }
     }
 
     // Output JSON to stdout
-    std::cout << outputJson.dump(4) << std::endl; // Pretty-print with 4-space indentation
+    cout << outputJson.dump(4) << endl;  // Pretty-print with 4-space indentation
 
     return 0;
 }

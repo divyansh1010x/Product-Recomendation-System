@@ -15,7 +15,7 @@ function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch('http://localhost:5001/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ function LoginPage() {
   // Fetch favorite category function
   const fetchFavoriteCategory = async (userId) => {
     try {
-      const response = await fetch('http://localhost:5000/fav_category', {
+      const response = await fetch('http://localhost:5001/fav_category', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

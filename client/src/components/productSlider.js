@@ -22,7 +22,7 @@ class ProductSlider extends Component {
 
   fetchProducts = async (productIds) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/products?ids=${productIds.join(',')}`);
+      const response = await axios.get(`http://localhost:5001/api/products?ids=${productIds.join(',')}`);
       this.setState({ products: response.data });
     } catch (error) {
       console.error("Error fetching products:", error);

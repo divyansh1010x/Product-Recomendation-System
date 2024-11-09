@@ -6,15 +6,21 @@ const path = require('path');
 const fs = require("fs"); 
 const { stdout, stderr } = require("process");
 const { log } = require("console");
+const os = require("os");
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 app.use(cors());
 app.use(express.json());
 
 const userDataPath = path.join(__dirname, 'dataset', 'users_data.json');
 const transactionsFilePath = path.join(__dirname, 'dataset', 'dummy2.json');
+
+function getExecutableFile(fileName) {
+  const platform = os.platform();
+  return platform === 'win32' ? `${fileName}.exe` : fileName;
+}
 
 // Endpoint to get product IDs (you can customize this as needed)
 app.get("/api/product-ids", (req, res) => {
@@ -44,7 +50,7 @@ app.post('/recommend', (req, res) => {
   }
 
   // Execute the C++ program with the user ID as an argument
-  const cppExecutable = path.join(__dirname, 'cpp_algorithms', 'user_recommend.exe');
+  const cppExecutable = path.join(__dirname, 'cpp_algorithms', getExecutableFile('user_recommend'));
   console.log(`"${cppExecutable}" ${user}`);
   
   exec(`"${cppExecutable}" ${user}`, (error, stdout, stderr) => {
@@ -110,7 +116,7 @@ app.post('/trending', (req, res) => {
   console.log(req.body);
 
   const category = req.body.category || "toys";  // Only taking category now
-  const cppExecutable = path.join(__dirname, `cpp_algorithms`, `trending.exe`);
+  const cppExecutable = path.join(__dirname, `cpp_algorithms`, getExecutableFile(`trending`));
   console.log(`${cppExecutable} "${category}"`);  // Updated command to only use category
   
   // Execute the C++ program with just the category argument
@@ -140,8 +146,9 @@ app.post('/trending', (req, res) => {
 app.post('/fav_category', (req, res) => {
   const userId = req.body.user;  // assuming req.body contains { user: "97" }
 
-  const cppExecutable = path.join(__dirname, 'cpp_algorithms', 'fav_category.exe');
+  const cppExecutable = path.join(__dirname, 'cpp_algorithms', getExecutableFile('fav_category'));
   const command = `"${cppExecutable}" ${userId}`;
+  console.log(`Executing command: ${command}`); // Log command being executed
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
@@ -154,9 +161,12 @@ app.post('/fav_category', (req, res) => {
       return res.status(500).json({ error: 'Error in C++ program' });
     }
 
+    // Log the raw output to inspect the favorite category
+    console.log(`Raw output (favorite category): ${stdout}`);
+
     try {
       const result = JSON.parse(stdout);
-      console.log(result);
+      console.log(result);  // Log parsed result
       res.json(result);
     } catch (parseError) {
       console.error(`Failed to parse JSON output: ${parseError.message}`);
@@ -165,13 +175,14 @@ app.post('/fav_category', (req, res) => {
   });
 });
 
+
 app.post('/search', (req, res) => {
   log(req.body);
 
   const searchTerm = req.body.searchTerm;
   console.log(searchTerm);
   
-  const cppExecutable = path.join(__dirname, `cpp_algorithms`, `search.exe`);
+  const cppExecutable = path.join(__dirname, `cpp_algorithms`, getExecutableFile(`search`));
   console.log(`"${cppExecutable}" ${searchTerm}`);
 
   exec(`"${cppExecutable}" ${searchTerm}`, (error, stdout, stderr) => {
