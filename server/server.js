@@ -302,6 +302,36 @@ app.post('/api/purchase', (req, res) => {
   });
 });
 
+app.post('/brought_together', (req, res) => {
+  const cartInput = req.body.cartInput; // Cart input is sent in the request body
+
+  // Path to C++ executable
+  const cppExecutable = path.join(__dirname, 'cpp_algorithms', getExecutableFile('brought_together'));
+
+  // Call C++ program with the cart input
+  exec(`"${cppExecutable}" "${cartInput}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error executing C++ program: ${error.message}`);
+      return res.status(500).json({ error: 'Failed to get recommendations' });
+    }
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return res.status(500).json({ error: 'Error in C++ program' });
+    }
+
+    try {
+      // Parse the output of the C++ program (JSON)
+      const result = JSON.parse(stdout);
+      // Send back the recommendations as a JSON response
+      res.json(result);
+    } catch (parseError) {
+      console.error(`Failed to parse JSON output: ${parseError.message}`);
+      res.status(500).json({ error: 'Failed to parse recommendations' });
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

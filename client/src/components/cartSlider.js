@@ -5,7 +5,7 @@ import axios from "axios";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-class ProductSlider extends Component {
+class CartSlider extends Component {
   state = {
     products: [],
     loading: true,
@@ -101,8 +101,8 @@ class ProductSlider extends Component {
   }
 }
 
-ProductSlider.defaultProps = {
+CartSlider.defaultProps = {
   productIds: [],
 };
 
-export default ProductSlider;
+export default CartSlider;

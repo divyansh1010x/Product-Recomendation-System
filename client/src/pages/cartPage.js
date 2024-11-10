@@ -1,88 +1,99 @@
 import React, { useState, useEffect } from "react";
-import ProductSlider from "../components/cartSlider"; // Adjust import path if necessary
+import CartSlider from "../components/cartSlider"; // Adjust import path if necessary
 import Navbar from "../components/navBar";
+import ProductSlider from '../components/productSlider';
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
   const [purchaseCompleted, setPurchaseCompleted] = useState(false); // New state for purchase status
+  const [recommendations, setRecommendations] = useState([]); // New state for recommendations
 
   useEffect(() => {
     // Retrieve cart (product IDs) from session storage when the component mounts
     const cartItems = JSON.parse(sessionStorage.getItem("cart")) || [];
     setCart(cartItems); // Update the state with the cart items
-  }, []);
+
+    if (cartItems.length > 0) {
+      // Prepare cart items for the request in the required format
+      const cartInput = cartItems.join(", ");
+
+      fetch("http://localhost:5001/brought_together", {
+        method: "POST",  // Using POST to send data in the body
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ cartInput }),  // Send cartInput in the required format
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.recommendations && data.recommendations.length > 0) {
+            const recommendationList = data.recommendations.split(",").map(Number);
+            setRecommendations(recommendationList);
+          } else {
+            setRecommendations([]); // Set empty array if no recommendations are found
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching recommendations:", error);
+          setRecommendations([]); // Handle error and set empty array
+        });
+    }
+  }, [cart]); // Trigger when the cart updates
 
   const handleRemoveFromCart = (productId) => {
-    // Remove the product from the cart
     const updatedCart = cart.filter((id) => id !== productId);
-
-    // Ensure the new cart array reference is different
-    setCart([...updatedCart]);
-
-    // Save the updated cart to sessionStorage
+    setCart(updatedCart);
     sessionStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
   const handleClearCart = () => {
-    // Clear all items from the cart
     setCart([]);
-
-    // Clear the cart from sessionStorage
     sessionStorage.removeItem("cart");
   };
 
   const handleBuy = () => {
-    // Retrieve 'user' and 'cart' from sessionStorage
     const user = JSON.parse(sessionStorage.getItem("user")); // Parse user as an object
     const cart = JSON.parse(sessionStorage.getItem("cart")); // Parse cart as an array
-  
-    // Check if user and cart data exist and are valid
+
     if (!user || !user.user_id || !cart || !Array.isArray(cart) || cart.length === 0) {
       console.log("User or cart data is missing or invalid.");
       alert("User or cart data is missing or invalid.");
       return;
     }
-  
-    // Prepare data in the required format with 'products' as an array
-    const formattedData = {
-      user: String(user.user_id),    // Convert user_id to a string
-      products: cart                 // Send cart as an array, as expected by the API
-    };
-  
-    // Display formatted data in console for debugging
-    console.log("Proceeding to checkout with data:", formattedData);
-  
-    // Make API request to /api/purchase
-    fetch('http://localhost:5001/api/purchase', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formattedData)
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        console.error("Error:", data.error);
-        alert("Failed to complete purchase: " + data.error);
-      } else {
-        console.log("Success:", data.message);
-        alert("Purchase successful!");
 
-        // Clear the cart from sessionStorage and update the state
-        sessionStorage.removeItem("cart");
-        setCart([]);
-        
-        // Display the thank you message by setting purchaseCompleted to true
-        setPurchaseCompleted(true);
-      }
+    const formattedData = {
+      user: String(user.user_id),  // Convert user_id to a string
+      products: cart,  // Send cart as an array, as expected by the API
+    };
+
+    console.log("Proceeding to checkout with data:", formattedData);
+
+    fetch("http://localhost:5001/api/purchase", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formattedData),
     })
-    .catch(error => {
-      console.error("Error:", error);
-      alert("An error occurred while processing your purchase.");
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.error) {
+          console.error("Error:", data.error);
+          alert("Failed to complete purchase: " + data.error);
+        } else {
+          console.log("Success:", data.message);
+          alert("Purchase successful!");
+          sessionStorage.removeItem("cart");
+          setCart([]);
+          setPurchaseCompleted(true);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("An error occurred while processing your purchase.");
+      });
   };
-  
+
   return (
     <div style={styles.container}>
       <Navbar />
@@ -94,25 +105,30 @@ const CartPage = () => {
           <p style={styles.thankYouMessage}>Thank you for your purchase!</p>
         ) : (
           <>
-            {/* Check if the cart is empty */}
             {cart.length === 0 ? (
               <p style={styles.emptyCart}>No items in the cart</p>
             ) : (
-              <ProductSlider productIds={cart} onRemoveFromCart={handleRemoveFromCart} />
+              <CartSlider productIds={cart} onRemoveFromCart={handleRemoveFromCart} />
             )}
-            
-            {/* Clear Cart Button */}
+
             {cart.length > 0 && (
               <button style={styles.clearCartButton} onClick={handleClearCart}>
                 Clear Cart
               </button>
             )}
 
-            {/* Buy Button */}
             {cart.length > 0 && (
               <button style={styles.buyButton} onClick={handleBuy}>
                 Buy
               </button>
+            )}
+
+            {/* Recommendations */}
+            {recommendations.length > 0 && (
+              <div style={styles.recommendationSection}>
+                <h3 style={styles.recommendationHeading}>Frequently Brought With These</h3>
+                <ProductSlider productIds={recommendations} />
+              </div>
             )}
           </>
         )}
@@ -170,6 +186,14 @@ const styles = {
     cursor: "pointer",
     marginTop: "10px",
     borderRadius: "5px",
+  },
+  recommendationSection: {
+    marginTop: "40px",
+  },
+  recommendationHeading: {
+    fontSize: "1.8rem",
+    color: "#333",
+    marginBottom: "20px",
   },
 };
 
