@@ -16,7 +16,7 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path='/dummy' element={<DummyPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<LoginPage />} />
         <Route path="/cart" element={<CartPage />} />
       </Routes>
     </Router>
